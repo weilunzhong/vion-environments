@@ -14,6 +14,7 @@ class EnvronmentClassifier(object):
             try:
                 while True:
                     batch, _ = next(batch_generator)
+                    assert batch.shape[3] == 3
                     frame_in_batch = batch.shape[0]
                     if frame_in_batch != batch_size:
                         temp_batch = np.ndarray([batch_size]+list(image_size)+[3])
