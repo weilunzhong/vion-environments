@@ -2,6 +2,7 @@ from places_CNDS import PlacesCNDS
 import tensorflow as tf
 import numpy as np
 from vionaux.rnd import vidioids
+import cv2
 
 class EnvronmentClassifier(object):
 
