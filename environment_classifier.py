@@ -36,7 +36,9 @@ def main():
     EC = EnvronmentClassifier()
     out = EC.network_deployment('places_CNDS_model.npy', batch_generator, batch_size, image_size)
     for i in out:
-        print i.shape
+        print "sum of the likelihood", np.sum(i, axis=1)
+        print i[0]
         print i.argmax(axis=1)
+        break
 if __name__ == "__main__":
     main()
