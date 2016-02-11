@@ -1,7 +1,7 @@
 from kaffe.tensorflow import Network
 
 class PlacesCNDS(Network):
-    scale_size = (227,227)
+    scale_size = (227, 227)
     mean_vec = [103.939, 116.799, 123.68]
     def setup(self):
         (self.feed('data')

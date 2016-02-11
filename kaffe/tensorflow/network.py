@@ -52,7 +52,6 @@ class Network(object):
                     print self.layers.keys()
                     raise KeyError('Unknown layer name fed: %s'%layer)
             self.inputs.append(layer)
-        print [i.__class__.__name__ for i in self.inputs]
         return self
 
     def get_output(self):
