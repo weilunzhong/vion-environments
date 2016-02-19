@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow 
+FROM b.gcr.io/tensorflow/tensorflow-devel-gpu
 
 COPY . /source_code
 
