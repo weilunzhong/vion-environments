@@ -40,7 +40,7 @@ def main():
     VHH = vidioids.VionVideoHandler()
     batch_size = 20
     image_size = PlacesCNDS.scale_size
-    batch_generator = VHH.get_batches(video_path, 0.01, 4000, 6000, batch_size, image_size)
+    batch_generator = VHH.get_batches(video_path, 0.1, 4000, 6000, batch_size, image_size)
     EC = EnvronmentClassifier()
     mean = EC.load_image_mean("places205_mean.npy")
     out = EC.network_deployment('places_CNDS_model.npy', batch_generator, batch_size, image_size, mean)
