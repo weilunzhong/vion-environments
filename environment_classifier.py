@@ -2,8 +2,32 @@ from places_CNDS import PlacesCNDS
 import tensorflow as tf
 import numpy as np
 from vionaux.rnd import vidioids
+import csv
 
-class EnvronmentClassifier(object):
+def get_transfer_lists():
+    with open("category_index/205_to_28_categories.csv") as file:
+        categories = csv.reader(file, delimiter=' ', quotechar='|')
+        transfer_list, transfer_name_list = [], []
+        for idx, row in enumerate(categories):
+            if idx %2 != 0:
+                transfer_list.append(row[0])
+            else:
+                transfer_name_list.append(row[0])
+    return transfer_list, transfer_name_list
+
+class EnvironmentClassifier(object):
+
+    @staticmethod
+    def get_transfer_lists():
+        with open("category_index/205_to_28_categories.csv") as file:
+            categories = csv.reader(file, delimiter=' ', quotechar='|')
+            transfer_list, transfer_name_list = [], []
+            for idx, row in enumerate(categories):
+                if idx %2 != 0:
+                    transfer_list.append(row[0])
+                else:
+                    transfer_name_list = []
+            return transfer_list, transfer_name_list
 
     def load_image_mean(self, path):
         mean = np.load(path)
@@ -41,12 +65,14 @@ def main():
     batch_size = 20
     image_size = PlacesCNDS.scale_size
     batch_generator = VHH.get_batches(video_path, 0.01, 4000, 6000, batch_size, image_size)
-    EC = EnvronmentClassifier()
+    EC = EnvironmentClassifier()
     mean = EC.load_image_mean("places205_mean.npy")
     out = EC.network_deployment('places_CNDS_model.npy', batch_generator, batch_size, image_size, mean)
+    transfer_list, name_list = get_transfer_lists()
+    print len(name_list)
     for i, timestamp in out:
         assert i.shape[0] == len(timestamp)
-        print i.argmax(axis=1)
+        print [name_list[x] for x in i.argmax(axis=1)]
 #        print timestamp
         print "one batch"
 
