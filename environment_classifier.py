@@ -4,17 +4,6 @@ import numpy as np
 from vionaux.rnd import vidioids
 import csv
 
-def get_transfer_lists():
-    with open("category_index/205_to_28_categories.csv") as file:
-        categories = csv.reader(file, delimiter=' ', quotechar='|')
-        transfer_list, transfer_name_list = [], []
-        for idx, row in enumerate(categories):
-            if idx %2 != 0:
-                transfer_list.append(row[0])
-            else:
-                transfer_name_list.append(row[0])
-    return transfer_list, transfer_name_list
-
 class EnvironmentClassifier(object):
 
     @staticmethod
@@ -26,7 +15,7 @@ class EnvironmentClassifier(object):
                 if idx %2 != 0:
                     transfer_list.append(row[0])
                 else:
-                    transfer_name_list = []
+                    transfer_name_list.append(row[0])
             return transfer_list, transfer_name_list
 
     def load_image_mean(self, path):
@@ -68,7 +57,7 @@ def main():
     EC = EnvironmentClassifier()
     mean = EC.load_image_mean("places205_mean.npy")
     out = EC.network_deployment('places_CNDS_model.npy', batch_generator, batch_size, image_size, mean)
-    transfer_list, name_list = get_transfer_lists()
+    transfer_list, name_list = EC.get_transfer_lists()
     print len(name_list)
     for i, timestamp in out:
         assert i.shape[0] == len(timestamp)
