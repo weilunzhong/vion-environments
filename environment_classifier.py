@@ -57,11 +57,11 @@ class EnvironmentClassifier(object):
 
 
 def main():
-    video_path = "/mnt/movies03/boxer_movies/tt3247714/Survivor (2015)/Survivor.2015.720p.BluRay.x264.YIFY.mp4"
+    video_path = "movie/011089061f42bfb9.mp4"
     VHH = vidioids.VionVideoHandler()
     batch_size = 20
     image_size = PlacesCNDS.scale_size
-    batch_generator = VHH.get_batches(video_path, 0.01, 4000, 6000,
+    batch_generator = VHH.get_batches(video_path, 0.1, 0, None,
                                       batch_size, image_size)
     EC = EnvironmentClassifier()
     mean = EC.load_image_mean("places205_mean.npy")
