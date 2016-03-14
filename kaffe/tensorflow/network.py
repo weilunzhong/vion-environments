@@ -147,4 +147,4 @@ class Network(object):
 
     @layer
     def dropout(self, input, keep_prob, name):
-        return rf.nn.dropout(input, keep_prob, name=name)
+        return tf.nn.dropout(input, keep_prob, name=name)
