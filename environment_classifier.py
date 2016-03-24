@@ -1,4 +1,4 @@
-from places_CNDS import PlacesCNDS
+from model.places_CNDS import PlacesCNDS
 import tensorflow as tf
 import numpy as np
 from vionaux.rnd import vidioids
@@ -20,13 +20,12 @@ class EnvironmentClassifier(object):
 
     def load_image_mean(self, path):
         mean = np.load(path)
-        mean = mean.transpose(1,2,0)
         return mean
 
-    def network_deployment(self, model,batch_generator,
-                           batch_size, image_size, mean):
-        test_data = tf.placeholder(tf.float32,
-                                   shape=([batch_size]+list(PlacesCNDS.scale_size)+[3]))
+    def network_deployment(self, model, batch_generator,
+                           batch_size, image_size):
+        shape = ([batch_size, image_size[1], image_size[0], 3])
+        test_data = tf.placeholder(tf.float32, shape=shape)
         net =PlacesCNDS({'data':test_data})
 
         with tf.Session() as sesh:
@@ -34,7 +33,7 @@ class EnvironmentClassifier(object):
             try:
                 while True:
                     batch, timestamp = next(batch_generator)
-                    print batch.shape
+                    print "shape of the batch:", batch.shape
                     assert batch.shape[3] == 3
                     # TODO (Weilun) image mean resizing to match the dimension
                     # of input data
@@ -55,25 +54,28 @@ class EnvironmentClassifier(object):
             except StopIteration:
                     return
 
+    def run_classification(self, path, batch_size, sample_rate):
+        VHH = vidioids.VionVideoHandler()
+        image_width = PlacesCNDS.scale_size[0]
+        params = VHH.get_video_params(path)
+        ratio = float(params["width"])/params["height"]
+        image_size = (int(ratio*image_width), image_width)
+        batch_generator = VHH.get_batches(path, sample_rate, 0, None,
+                                          batch_size, image_size)
+        out = self.network_deployment('model/places_CNDS_model.npy',
+                                    batch_generator, batch_size, image_size)
+        transfer_list, name_list = self.get_transfer_lists()
+        for i, timestamp in out:
+            assert i.shape[0] == len(timestamp)
+            print [name_list[x] for x in i.argmax(axis=1)]
+            print timestamp
+            print "#"*10
 
 def main():
-    video_path = "movie/011089061f42bfb9.mp4"
-    VHH = vidioids.VionVideoHandler()
+    video_path = "/mnt/movies03/boxer_movies/tt0401383/The Diving Bell and the Butterfly (2007) 720p BRrip.sujaidr (pimprg)/The Diving Bell and the Butterfly (2007) 720p BRrip.sujaidr (pimprg).mkv"
     batch_size = 20
-    image_size = PlacesCNDS.scale_size
-    batch_generator = VHH.get_batches(video_path, 0.1, 0, None,
-                                      batch_size, image_size)
     EC = EnvironmentClassifier()
-    mean = EC.load_image_mean("places205_mean.npy")
-    out = EC.network_deployment('places_CNDS_model.npy',
-                                batch_generator, batch_size, image_size, mean)
-    transfer_list, name_list = EC.get_transfer_lists()
-    print len(name_list)
-    for i, timestamp in out:
-        assert i.shape[0] == len(timestamp)
-        print [name_list[x] for x in i.argmax(axis=1)]
-#        print timestamp
-        print "one batch"
+    EC.run_classification(video_path, batch_size, 0.1)
 
 
 if __name__ == "__main__":

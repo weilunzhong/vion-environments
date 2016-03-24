@@ -1,10 +1,23 @@
-from vgg16_places2 import VggPlaces2
 import tensorflow as tf
+import csv
 import numpy as np
+from model.places_CNDS import PlacesCNDS
 from vionaux.rnd import vidioids
 import cv2
 
 class EnvronmentClassifier(object):
+
+    @staticmethod
+    def get_transfer_lists():
+        with open("category_index/205_to_28_categories.csv") as file:
+            categories = csv.reader(file, delimiter=' ', quotechar='|')
+            transfer_list, transfer_name_list = [], []
+            for idx, row in enumerate(categories):
+                if idx %2 != 0:
+                    transfer_list.append(row[0])
+                else:
+                    transfer_name_list.append(row[0])
+            return transfer_list, transfer_name_list
 
     def load_image_mean(self, path):
         mean = np.load(path)
@@ -12,8 +25,9 @@ class EnvronmentClassifier(object):
         return mean
 
     def network_deployment(self, model,batch_generator, batch_size, image_size, mean):
-        test_data = tf.placeholder(tf.float32, shape=([batch_size]+list(VggPlaces2.scale_size)+[3]))
-        net = VggPlaces2({'data':test_data})
+        shape = ([batch_size, image_size[1], image_size[0], 3])
+        test_data = tf.placeholder(tf.float32, shape=shape)
+        net = PlacesCNDS({'data':test_data})
 
         with tf.Session() as sesh:
             net.load(model, sesh)
@@ -39,17 +53,22 @@ class EnvronmentClassifier(object):
 def main():
     video_path = "/mnt/movies03/boxer_movies/tt3247714/Survivor (2015)/Survivor.2015.720p.BluRay.x264.YIFY.mp4"
     cap = cv2.VideoCapture(video_path)
-
     VHH = vidioids.VionVideoHandler()
+    image_width = PlacesCNDS.scale_size[0]
+    params = VHH.get_video_params(video_path)
+    ratio = float(params["width"])/params["height"]
+    image_size = (int(ratio*image_width), image_width)
     batch_size = 20
-    image_size = VggPlaces2.scale_size
-    batch_generator = VHH.get_batches(video_path, 0.01, 1000, 2000, batch_size, image_size)
+    image_size = PlacesCNDS.scale_size
+    batch_generator = VHH.get_batches(video_path, 0.1, 1000, 2000, batch_size, image_size)
     EC = EnvronmentClassifier()
     mean = EC.load_image_mean("places205_mean.npy")
-    out = EC.network_deployment('vgg16_places2_caffemodel.npy', batch_generator, batch_size, image_size, mean)
+    out = EC.network_deployment('model/places_CNDS_model.npy', batch_generator, batch_size, image_size, mean)
+    transfer_list, transfer_name_list = EC.get_transfer_lists()
     for i, timestamp in out:
         assert i.shape[0] == len(timestamp)
-        print i.argmax(axis=1)
+        res_name = [transfer_name_list[idx] for idx in i.argmax(axis=1)]
+        print res_name
         print timestamp
         print "one batch"
         real_time = [i/1000. for i in timestamp]
