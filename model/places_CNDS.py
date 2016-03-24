@@ -1,10 +1,13 @@
 from kaffe.tensorflow import Network
+import numpy as np
 
 class PlacesCNDS(Network):
     scale_size = (227, 227)
-    mean_vec = [103.939, 116.799, 123.68]
+    # mean_path = "places205_mean_224.npy"
+    # mean_vec = np.load(mean_path)
     def setup(self):
         (self.feed('data')
+             .crop(227, 227, name='random_crop')
              .conv(7, 7, 64, 2, 2, name='conv1')
              .max_pool(3, 3, 2, 2, name='pool1')
              .conv(3, 3, 128, 1, 1, name='conv2')

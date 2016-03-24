@@ -2,9 +2,9 @@ from kaffe.tensorflow import Network
 
 class VggPlaces2(Network):
     scale_size = (224, 224)
-    mean_vec = [103.939, 116.799, 123.68]
     def setup(self):
         (self.feed('data')
+             .crop(224, 224, name = "random_crop")
              .conv(3, 3, 64, 1, 1, name='conv1_1')
              .conv(3, 3, 64, 1, 1, name='conv1_2')
              .max_pool(2, 2, 2, 2, name='pool1')
