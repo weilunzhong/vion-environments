@@ -68,6 +68,24 @@ class Network(object):
         assert padding in ('SAME', 'VALID')
 
     @layer
+    def subtract_mean(self, input, mean_vec,  name):
+        """subtract image mean"""
+        batch_size = input.get_shape().as_list()[0]
+        replicated_mean = tf.Variable(mean_vec) * batch_size
+        return input - tf.identity(replicated_mean)
+
+    @layer
+    def crop(self, input, width, height, name):
+        """
+        random crop the image to fit the size of the network
+        no distortion in the process
+        """
+        with tf.variable_scope(name) as scope:
+            c_i = input.get_shape().as_list()[-1]
+            batch_size = input.get_shape().as_list()[0]
+            return tf.random_crop(input, [batch_size, width, height, c_i])
+
+    @layer
     def conv(self, input, k_h, k_w, c_o, s_h, s_w, name, relu=True, padding=DEFAULT_PADDING, group=1):
         self.validate_padding(padding)
         c_i = input.get_shape()[-1]
