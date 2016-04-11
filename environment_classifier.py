@@ -33,7 +33,7 @@ class EnvironmentClassifier(object):
             try:
                 while True:
                     batch, timestamp = next(batch_generator)
-                    print "shape of the batch:", batch.shape
+                    # print "shape of the batch:", batch.shape
                     assert batch.shape[3] == 3
                     # TODO (Weilun) image mean resizing to match the dimension
                     # of input data
@@ -41,7 +41,7 @@ class EnvironmentClassifier(object):
                     #     batch[idx] = np.subtract(batch[idx], mean)
                     frame_in_batch = batch.shape[0]
                     if frame_in_batch != batch_size:
-                        temp_batch = np.ndarray([batch_size]+list(image_size)+[3])
+                        temp_batch = np.ndarray(shape)
                         temp_batch[0:frame_in_batch] = batch
                         batch = temp_batch
                         output = sesh.run(net.get_output(),
@@ -54,7 +54,7 @@ class EnvironmentClassifier(object):
             except StopIteration:
                     return
 
-    def run_classification(self, path, batch_size, sample_rate):
+    def run_classification(self, path, batch_size=20, sample_rate=0.01):
         VHH = vidioids.VionVideoHandler()
         image_width = PlacesCNDS.scale_size[0]
         params = VHH.get_video_params(path)
@@ -62,20 +62,21 @@ class EnvironmentClassifier(object):
         image_size = (int(ratio*image_width), image_width)
         batch_generator = VHH.get_batches(path, sample_rate, 0, None,
                                           batch_size, image_size)
-        out = self.network_deployment('model/places_CNDS_model.npy',
+        output = self.network_deployment('model/places_CNDS_model.npy',
                                     batch_generator, batch_size, image_size)
         transfer_list, name_list = self.get_transfer_lists()
-        for i, timestamp in out:
+        for i, timestamp in output:
             assert i.shape[0] == len(timestamp)
             print [name_list[x] for x in i.argmax(axis=1)]
             print timestamp
             print "#"*10
+        return output
 
 def main():
-    video_path = "/mnt/movies03/boxer_movies/tt0401383/The Diving Bell and the Butterfly (2007) 720p BRrip.sujaidr (pimprg)/The Diving Bell and the Butterfly (2007) 720p BRrip.sujaidr (pimprg).mkv"
+    video_path = "/mnt/movies03/boxer_movies/tt0401855/Underworld Evolution (2006)/Underworld.Evolution.2006.720p.Brrip.x264.Deceit.mp4"
     batch_size = 20
     EC = EnvironmentClassifier()
-    EC.run_classification(video_path, batch_size, 0.1)
+    EC.run_classification(video_path, batch_size, 0.01)
 
 
 if __name__ == "__main__":
