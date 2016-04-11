@@ -64,12 +64,12 @@ class EnvironmentClassifier(object):
                                           batch_size, image_size)
         output = self.network_deployment('model/places_CNDS_model.npy',
                                     batch_generator, batch_size, image_size)
-        transfer_list, name_list = self.get_transfer_lists()
-        for i, timestamp in output:
-            assert i.shape[0] == len(timestamp)
-            print [name_list[x] for x in i.argmax(axis=1)]
-            print timestamp
-            print "#"*10
+        # transfer_list, name_list = self.get_transfer_lists()
+        # for i, timestamp in output:
+        #     assert i.shape[0] == len(timestamp)
+        #     print [name_list[x] for x in i.argmax(axis=1)]
+        #     print timestamp
+        #     print "#"*10
         return output
 
 def main():
