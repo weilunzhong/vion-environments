@@ -51,6 +51,17 @@ class EnvironmentClassifier(object):
                         output = sesh.run(net.get_output(),
                                           feed_dict= {test_data:batch})
                         yield output, timestamp
+                    # graph = tf.get_default_graph()
+                    # graph_def = graph.as_graph_def()
+                    # print "graph_def byte size: ", graph_def.ByteSize()
+                    # graph_def_s = graph_def.SerializeToString()
+
+                    # save_path = 'PlacesCNDS.tfmodel'
+                    # with open(save_path, 'wb') as f:
+                    #     f.write(graph_def_s)
+
+                    # print 'model saved'
+                    # return
             except StopIteration:
                     return
 
